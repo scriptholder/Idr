@@ -1,4 +1,4 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/WassimALG23/Noshi/refs/heads/main/Loader"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/scriptholder/Idr/refs/heads/main/Loader.lua"))()
 local script_version = {
     -- version
     version = "1.8",
