@@ -442,57 +442,9 @@ shop:AddToggle("", {
 
 -- 
 
-plant:AddButton({
-    Title = "Set Plant position",
-    Description = "Click to set both X and Y to current position",
-    Callback = function()
-        local currentPos = hrp.Position
-        local fixedY = 0.13552513718605042
 
-        x = Vector3.new(currentPos.X, fixedY, currentPos.Z)
-        y = Vector3.new(currentPos.X, fixedY, currentPos.Z)
 
-        print("Start (X) and End (Y) positions set to:", x)
-    end
-})
 
-local Slider = plant:AddInput("StepInput", {
-    Title = "Step Between Seeds",
-    Description = "Enter the distance between the seeds (e.g., 0.005)",
-    Placeholder = "1",
-    Default = "0.001",
-    Numeric = true,
-    Callback = function(input)
-        local num = tonumber(input)
-        if num then
-            step = num
-            print("Step set to:", step)
-        else
-            warn("Invalid number entered for step.")
-        end
-    end
-})
-
-plant:AddButton({
-    Title = "click to plant",
-    Description = "have the seed in your hand",
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        local tool = player.Character and player.Character:FindFirstChildOfClass("Tool")
-        if not tool then return end
-
-        local baseName = tool.Name:match("^(.-)%s+[Ss]eed") or tool.Name
-        baseName = baseName:gsub("%s+$", "")
-
-        local direction = (y - x).Unit
-        local distance = (y - x).Magnitude
-        for i = 0, distance, step do
-            local pos = x + direction * i
-            Plant:FireServer(pos, baseName)
-            task.wait()
-        end
-    end
-})
 --
 local sellsection = main:AddSection("auto sell")
 main:AddButton({
