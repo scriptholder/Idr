@@ -348,119 +348,186 @@ local function tsm()
     tpt(Pos)
 end
 
-local function ufav()
-    local player = game:GetService("Players").LocalPlayer
-    local char = player.Character
-    local backpack = player.Backpack
-    local tool = char:FindFirstChildOfClass("Tool") or backpack:FindFirstChildOfClass("Tool")
-
-    if tool and tool:GetAttribute("Favorite") == true then
-        game:GetService("ReplicatedStorage").GameEvents.Favorite_Item:FireServer({tool})
-    end
-end
-
-
-local function GetFarm(PlayerName: string): Folder?
-	local Farms = GetFarms()
-	for _, Farm in next, Farms do
-		local Owner = GetFarmOwner(Farm)
-		if Owner == PlayerName then
-			return Farm
-		end
-	end
-    return
-end
-
-    local function GetMyFarm()
-	for _, farm in pairs(workspace.Farm:GetChildren()) do
-		local owner = farm:FindFirstChild("Important") and farm.Important:FindFirstChild("Data") and farm.Important.Data:FindFirstChild("Owner")
-		if owner and owner.Value == LocalPlayer.Name then
-			return farm
-		end
-	end
-end
-
-local function GetRandomFarmPoint()
+local function favoriteAll(toFav)
 	local farm = GetMyFarm()
-	if not farm then return Vector3.new(0, 0, 0) end
-	local plantLocations = farm.Important:FindFirstChild("Plant_Locations")
-	if not plantLocations then return Vector3.new(0, 0, 0) end
+	if not farm then return end
+	local plants = farm.Important:FindFirstChild("Plants_Physical")
+	if not plants then return end
 
-	local parts = plantLocations:GetChildren()
-	if #parts == 0 then return Vector3.new(0, 0, 0) end
-
-	local part = parts[math.random(1, #parts)]
-	local pos, size = part.Position, part.Size
-	return Vector3.new(
-		math.random(math.floor(pos.X - size.X / 2), math.floor(pos.X + size.X / 2)),
-		4,
-		math.random(math.floor(pos.Z - size.Z / 2), math.floor(pos.Z + size.Z / 2))
-	)
-end
-
-local function GetHarvestablePlants()
-	local character = LocalPlayer.Character
-	if not character then return {} end
-
-	local root = GetMyFarm()
-	if not root then return {} end
-
-	local plantFolder = root.Important:FindFirstChild("Plants_Physical")
-	if not plantFolder then return {} end
-
-	local plants = {}
-
-	for _, model in pairs(plantFolder:GetDescendants()) do
-		if model:IsA("ProximityPrompt") and model.Enabled then
-			local plantModel = model:FindFirstAncestorWhichIsA("Model")
-			if plantModel then
-				table.insert(plants, plantModel)
+	for _, fruitFolder in ipairs(plants:GetChildren()) do
+		local fruits = fruitFolder:FindFirstChild("Fruits")
+		if fruits then
+			for _, fruit in ipairs(fruits:GetChildren()) do
+				for _, tool in ipairs(backpack:GetChildren()) do
+					if tool:IsA("Tool") and tool.Name:lower():match("favorite tool") then
+						local args = {tool, fruit, toFav}
+						pcall(function()
+							FavoriteToolRemote:InvokeServer(unpack(args))
+							print((toFav and "✅ Fav" or "❌ Unfav") .. " tool for fruit: " .. fruit.Name)
+						end)
+					end
+				end
 			end
 		end
 	end
-
-	return plants
 end
 
-local function HarvestPlants()
-    print("HarvestPlants called") -- Add this line
 
-    for _, prompt in ipairs(GetHarvestablePlants()) do
-        pcall(function()
-            print("Firing server for:", prompt) -- Add this too
-            ReplicatedStorage.ByteNetReliable:FireServer(buffer.fromstring("\001\001\000\001"), { prompt })
-        end)
+
+
+local eggDropSection = main:AddSection("auto place eggs")
+
+local availableEggs = {"Common Egg", "Uncommon Egg", "Common Summer Egg"}
+local selectedEggs = {}
+local eggCooldown = 10
+local autoEggEnabled = false
+
+eggDropSection:AddInput("EggCooldownInput", {
+    Title = "Egg Cooldown (seconds)",
+    Default = "10",
+    Numeric = true,
+    Callback = function(value)
+        local v = tonumber(value)
+        if v then eggCooldown = v end
     end
-end
+})
 
-task.spawn(function()
-	while task.wait(0.3) do
-		if autoHarvestEnabled then
-				print("Loop running. autoHarvestEnabled =", autoHarvestEnabled)
-				
-			HarvestPlants()
-		end
-	end
+local eggDropdown = eggDropSection:AddDropdown("EggDropdownMulti", {
+    Title = "Select Eggs to Place",
+    Values = availableEggs,
+    Multi = true,
+    Default = {},
+})
+
+eggDropdown:OnChanged(function(value)
+    selectedEggs = {}
+    for name, active in pairs(value) do
+        if active then table.insert(selectedEggs, name) end
+    end
 end)
 
-
--- Local Script --
-local HarvestIgnores = {
-	Normal = false,
-	Gold = false,
-	Rainbow = false
-}
-local autoHarvestEnabled = false
-local collectsection = main:AddSection("auto collect")
-
-collectsection:AddToggle("AutoHarvest", {
-    Title = "Auto Collect Plants",
-    Description = "",
+eggDropSection:AddToggle("AutoEggToggle", {
+    Title = "Auto Place Eggs",
     Default = false,
+    Callback = function(state)
+        autoEggEnabled = state
+        if not state then return end
+
+        task.spawn(function()
+            while autoEggEnabled do
+                local farm = GetMyFarm()
+                if farm and #selectedEggs > 0 then
+                    for _, egg in ipairs(selectedEggs) do
+                        local tool = findHeldTool(egg)
+                        if tool then
+                            tool.Parent = player.Character
+                            local locs = farm.Important.Plant_Locations:GetChildren()
+                            for i = 1, 8 do
+                                local randomPos = locs[math.random(1, #locs)].Position
+                                PetEggService:FireServer("CreateEgg", randomPos)
+                                task.wait(0.2)
+                            end
+                        end
+                    end
+                end
+                task.wait(eggCooldown)
+            end
+        end)
+    end
+})
+
+
+
+
+		
+
+local sprinklerSection = main:AddSection("auto sprinkler")
+
+local sprinklerList = {
+    "Basic Sprinkler", "Advanced Sprinkler", "Godly Sprinkler",
+    "Lightning Rod", "Master Sprinkler", "Honey Sprinkler"
+}
+local selectedSprinklers = {}
+local sprinklerCooldown = 10
+local sprinklerEnabled = false
+local sprinklerPos = nil
+
+sprinklerSection:AddInput("SprinklerCooldownInput", {
+    Title = "Sprinkler Cooldown (s)",
+    Default = "10",
+    Numeric = true,
     Callback = function(value)
-    print("Toggle changed:", value)
-    autoHarvestEnabled = value
-		end
+        local v = tonumber(value)
+        if v then sprinklerCooldown = v end
+    end
+})
+
+sprinklerSection:AddDropdown("SprinklerDropdown", {
+    Title = "Select Sprinklers",
+    Values = sprinklerList,
+    Multi = true,
+    Default = {},
+}):OnChanged(function(value)
+    selectedSprinklers = {}
+    for name, active in pairs(value) do
+        if active then table.insert(selectedSprinklers, name) end
+    end
+end)
+
+sprinklerSection:AddButton({
+    Title = "Set Position",
+    Callback = function()
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            sprinklerPos = player.Character.HumanoidRootPart.CFrame
+            print("🌧️ Sprinkler position saved.")
+        end
+    end
+})
+		
+sprinklerSection:AddToggle("AutoSprinklerToggle", {
+    Title = "Auto Place Sprinklers",
+    Default = false,
+    Callback = function(state)
+        sprinklerEnabled = state
+        if not state then return end
+
+        task.spawn(function()
+            while sprinklerEnabled do
+                if sprinklerPos and #selectedSprinklers > 0 then
+                    for _, name in ipairs(selectedSprinklers) do
+                        local tool = findHeldTool(name)
+                        if tool then
+                            tool.Parent = player.Character
+                            rs.GameEvents.SprinklerService:FireServer("Create", sprinklerPos)
+                            task.wait(0.3)
+                        end
+                    end
+                end
+                task.wait(sprinklerCooldown)
+            end
+        end)
+    end
+})
+
+
+
+		
+main:AddSection("favorite tools")
+
+main:AddButton({
+    Title = "Favorite All",
+    Description = "Favorites the tool for all fruits in your farm",
+    Callback = function()
+        favoriteAll(true)
+    end
+})
+
+main:AddButton({
+    Title = "Unfavorite All",
+    Description = "Unfavorites the tool for all fruits in your farm",
+    Callback = function()
+        favoriteAll(false)
+    end
 })
 
 
