@@ -130,13 +130,14 @@ end
 end)
 
 -- 🔁 Alternating Submit Logic
-local mutationOrder = {"corrupt", "tranquil"}
+local mutationOrder = {"Corrupt", "Tranquil"}
 local nextMutation = 1
 local excludedPets = {
 ["T-Rex"] = true,
 ["Corrupt Staff"] = true,
 ["Corrupted Kitsune"] = true,
-["Corrupted Zen Crate"] = true
+["Corrupted Zen Crate"] = true,
+	["Zenflare seed"] = true
 }
 
 local function getSubmitPosition()
@@ -218,9 +219,9 @@ task.wait(2)
 
 		local waterPos = Vector3.new(74.483, 0.136, -103.564)  
 		local waterRE = ReplicatedStorage:WaitForChild("GameEvents"):WaitForChild("Water_RE")  
-		for _ = 1, 50 do  
+		for _ = 1, 30 do  
 			waterRE:FireServer(waterPos)  
-			task.wait(0.05)  
+			task.wait(0.09)  
 		end  
 
 		task.wait(2)  
@@ -250,7 +251,7 @@ task.wait(2)
 				for _, item in ipairs(backpack:GetChildren()) do  
 					if item:IsA("Tool") and not excludedPets[item.Name] then  
 						local lname = item.Name:lower()  
-						if (lname:find("zenflare") or lname:find("serenity")) or lname:find("Lucky Bamboo") and lname:find(mutationOrder[nextMutation]) then  
+						if (lname:find("zenflare") or lname:find("serenity")) and lname:find(mutationOrder[nextMutation]) then  
 							found = item  
 							break  
 						end  
