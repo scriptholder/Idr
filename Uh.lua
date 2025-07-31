@@ -265,15 +265,8 @@ task.wait(2)
 						end  
 					end  
 
-					if found and found.Parent == nil then  
-local success, err = pcall(function()  
+					
 	found.Parent = player.Character  
-end)  
-if not success then  
-	warn("❌ Failed to parent fruit:", err)  
-end
-
-end
 task.wait(0.3)
 ReplicatedStorage:WaitForChild("GameEvents"):WaitForChild("ZenQuestRemoteEvent"):FireServer("SubmitToFox")
 nextMutation = (nextMutation % #mutationOrder) + 1
