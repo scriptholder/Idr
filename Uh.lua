@@ -130,7 +130,7 @@ end
 end)
 
 -- 🔁 Alternating Submit Logic
-local mutationOrder = {"Corrupt", "Tranquil"}
+local mutationOrder = {"corrupt", "tranquil"}
 local nextMutation = 1
 local excludedPets = {
 ["T-Rex"] = true,
