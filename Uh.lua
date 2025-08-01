@@ -106,7 +106,7 @@ local farm = findMyFarm()
 							for _, child in ipairs(fruits:GetChildren()) do  
 								local part  
 										if name:find("lucky bamboo") then 
-											part = child:FindFirstChild("Base") 
+											part = child:FindFirstChild("Base")
 									elseif name:find("zenflare") then  
 									part = child:FindFirstChild("2")  
 								elseif name:find("serenity") then  
@@ -139,7 +139,7 @@ local excludedPets = {
 ["Corrupt Staff"] = true,
 ["Corrupted Kitsune"] = true,
 ["Corrupted Zen Crate"] = true,
-	["Zenflare seed"] = true,
+	["Zenflare Seed"] = true,
 	["Lucky Bamboo Seed"] = true
 }
 
@@ -248,7 +248,7 @@ task.wait(2)
 				end  
 			end  
 
-        local found = nil  
+			local found = nil  
 			local backpack = player:FindFirstChild("Backpack")  
 			if backpack then  
 				for _, item in ipairs(backpack:GetChildren()) do  
@@ -271,9 +271,7 @@ task.wait(2)
 
 					
 	found.Parent = player.Character  
-task.wait(0.3)			
-						end
-			
+task.wait(0.3)
 ReplicatedStorage:WaitForChild("GameEvents"):WaitForChild("ZenQuestRemoteEvent"):FireServer("SubmitToFox")
 nextMutation = (nextMutation % #mutationOrder) + 1
 task.wait(1.5)
@@ -293,4 +291,3 @@ task.wait(0.5)
 end
 
 end)
-
