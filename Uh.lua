@@ -144,7 +144,7 @@ local excludedPets = {
 }
 
 local function getSubmitPosition()
-local node = workspace.Interaction.UpdateItems["Corrupted Zen"].MiddleTree.Platform:GetChildren()[30]
+local node = workspace.ZenEvent["Corrupted Zen"].Platform.Kitsune
 if node then
 return node.Position
 end
