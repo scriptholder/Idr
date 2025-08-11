@@ -12,7 +12,7 @@ for _, v in pairs(guiService:GetChildren()) do
 end
 
 -- Config
-local correctKey = "Dead"
+local correctKey = "FirstPublic"
 local font = Enum.Font.Arcade
 local color1 = Color3.fromRGB(255, 0, 0)
 local color2 = Color3.fromRGB(100, 100, 100)
