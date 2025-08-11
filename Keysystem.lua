@@ -220,7 +220,7 @@ runBtn.MouseButton1Click:Connect(function()
 		TweenService:Create(sub, TweenInfo.new(1), {TextTransparency = 1}):Play()
 		task.wait(2)
 		intro:Destroy()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/scriptholder/Idr/refs/heads/main/Uh.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/scriptholder/Blah/refs/heads/main/Hub.lua"))()
 
 	else
 		warnText.Text = "Invalid key!"
